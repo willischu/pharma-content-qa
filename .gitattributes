@@ -1,3 +1,0 @@
-# Treat generated test reports as non-source artifacts
-reports/*.html binary
-reports/*.md linguist-generated=true
