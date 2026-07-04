@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pharma Content QA</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; color: #1f2937; }
+      form { display: grid; gap: 1rem; max-width: 720px; }
+      label { font-weight: 600; }
+      select, textarea, button { font-size: 1rem; padding: 0.7rem; border-radius: 6px; border: 1px solid #d1d5db; }
+      button { cursor: pointer; background: #2563eb; color: white; border: none; }
+      .spinner { display: none; margin-top: 0.5rem; color: #4b5563; }
+      .output, .status { margin-top: 1rem; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; }
+    </style>
+  </head>
+  <body>
+    <h1>Pharma Content QA</h1>
+    <p>Generate compliant marketing copy for review.</p>
+
+    <form id="content-form">
+      <label for="drug-select">Drug</label>
+      <select id="drug-select" data-testid="drug-select">
+        <option value="CardioStat">CardioStat</option>
+        <option value="NeuroCalm">NeuroCalm</option>
+        <option value="GlucoShield">GlucoShield</option>
+      </select>
+
+      <label for="channel-select">Channel</label>
+      <select id="channel-select" data-testid="channel-select">
+        <option value="social_media">Social Media</option>
+        <option value="email">Email</option>
+        <option value="web">Web</option>
+      </select>
+
+      <label for="prompt-input">Prompt</label>
+      <textarea id="prompt-input" data-testid="prompt-input" rows="6" placeholder="Describe the marketing content you want to generate..."></textarea>
+
+      <button id="generate-btn" data-testid="generate-btn" type="submit">Generate</button>
+      <div class="spinner" id="loading-spinner" data-testid="loading-spinner">Generating…</div>
+    </form>
+
+    <div id="ai-output" class="output" data-testid="ai-output">Waiting for content…</div>
+    <div id="compliance-status" class="status" data-testid="compliance-status">Pending Review</div>
+
+    <script>
+      const form = document.getElementById('content-form');
+      const output = document.getElementById('ai-output');
+      const status = document.getElementById('compliance-status');
+      const spinner = document.getElementById('loading-spinner');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        spinner.style.display = 'block';
+        output.textContent = 'Generating…';
+        status.textContent = 'Pending Review';
+
+        const payload = {
+          prompt: document.getElementById('prompt-input').value,
+          drug_name: document.getElementById('drug-select').value,
+          channel: document.getElementById('channel-select').value,
+          source_docs: {
+            approved_claims: ['Approved efficacy claim example'],
+            required_disclosures: ['See full prescribing information'],
+            prohibited_language: ['guaranteed', 'miracle']
+          }
+        };
+
+        try {
+          const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await response.json();
+          output.textContent = data.content || 'No content returned.';
+          status.textContent = 'Pending Review';
+        } catch (error) {
+          output.textContent = 'Failed to generate content.';
+          status.textContent = 'Pending Review';
+        } finally {
+          spinner.style.display = 'none';
+        }
+      });
+    </script>
+  </body>
+</html>

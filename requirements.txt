@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-dotenv
+httpx
+anthropic
+pytest
+pytest-playwright
+pytest-html
+allure-pytest
