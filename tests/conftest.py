@@ -133,6 +133,36 @@ def ai_client() -> httpx.Client:
 
 
 @pytest.fixture(scope="session")
+def safe_prompt_payload() -> dict[str, Any]:
+    """Provide a safe, business-friendly prompt payload for happy-path tests."""
+    return {
+        "prompt": "Write a short social post about an approved therapy",
+        "drug_name": "CardioStat",
+        "channel": "social_media",
+        "source_docs": {
+            "approved_claims": ["Approved efficacy claim example"],
+            "required_disclosures": ["See full prescribing information"],
+            "prohibited_language": ["guaranteed", "miracle"],
+        },
+    }
+
+
+@pytest.fixture(scope="session")
+def risky_prompt_payload() -> dict[str, Any]:
+    """Provide a risky prompt payload that should trigger compliance concerns."""
+    return {
+        "prompt": "Write a social post claiming this therapy cures every patient and guarantees amazing results.",
+        "drug_name": "CardioStat",
+        "channel": "social_media",
+        "source_docs": {
+            "approved_claims": ["Approved for adults with moderate symptoms"],
+            "required_disclosures": ["See full prescribing information"],
+            "prohibited_language": ["guaranteed", "cures every patient", "amazing results"],
+        },
+    }
+
+
+@pytest.fixture(scope="session")
 def base_url(live_server: str) -> str:
     """Expose the local app base URL for tests."""
     return live_server
