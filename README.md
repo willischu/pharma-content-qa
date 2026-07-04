@@ -1,18 +1,67 @@
 # Pharma Content QA
 
-AI Content Compliance Test Framework — a QA testing framework for validating AI-generated pharmaceutical marketing content against regulatory compliance standards.
+I built this project as a practical QA framework for testing AI-generated pharmaceutical marketing content. It shows how I set up a simple end-to-end workflow for validating content safety, compliance, and business risk.
 
-## Why this exists
+## Why I built it
 
-Testing non-deterministic AI systems in regulated industries is difficult because correctness is not a single fixed output. When AI-generated marketing content varies from run to run, traditional assertion-based tests such as asserting exactly one string is insufficient and can miss critical compliance failures with real-world consequences.
+I did not have prior experience testing LLM prompts, so I built this project as a hands-on way to learn the difference between traditional deterministic testing and the probabilistic nature of AI output. In a typical software test, I can rely on a fixed expectation. With AI-generated content, the output can vary, so I had to shift my mindset toward testing for safety, structure, and business rules rather than one exact response. This project helped me learn that approach by building a framework around compliance checks, PASS/FAIL outcomes, and realistic review criteria.
 
-## Architecture
+## How I set up the framework
 
-The framework uses a two-layer approach. First, Playwright E2E tests exercise the UI and capture generated content end to end. Second, an LLM-as-judge evaluates the captured content against a compliance rubric that checks claim accuracy, required disclosures, prohibited language, tone, and factual grounding. Both layers share the same evaluation engine through pytest fixtures.
+I structured the project in a simple flow:
 
-## Test categories
+1. I provide a prompt, a drug, and a channel in the app.
+2. The app generates marketing content.
+3. I use a compliance judge to review that content against a small set of business rules.
+4. I validate the result with clear PASS/FAIL checks.
 
-Planned test categories include E2E compliance checks, consistency and non-determinism tests, adversarial prompt injection defenses, and evaluation calibration tests.
+This gives me a clean way to show how I approach AI testing in a real-world, high-risk setting.
+
+## What I am validating
+
+The tests in this repository are designed around the following business requirements:
+
+- Claim accuracy: any benefit or efficacy claim must be supported by approved source material.
+- Safety disclosures: required warnings or prescribing information must be present or referenced.
+- Prohibited language: terms such as guaranteed or miracle should not appear.
+- Channel fit: the tone should be appropriate for the selected channel.
+- Factual grounding: the content should stay within the approved information provided.
+
+If any of these checks fail, I treat the content as a meaningful compliance risk.
+
+## What the compliance judge does
+
+I use the compliance judge in [utils/compliance_judge.py](utils/compliance_judge.py) to review the generated content and return a structured assessment. It looks at the content, the selected channel, and the source information provided to the system.
+
+It returns:
+
+- a result for each key area: claim accuracy, safety disclosures, prohibited language, tone, and factual grounding
+- an overall PASS or FAIL result
+- a short explanation of the decision
+
+That gives me a reliable way to validate safety and compliance without depending on one exact wording.
+
+## Source documents
+
+The source_docs input provides the approved background information for the generation and review process. It can include items such as:
+
+- approved claims
+- required disclosures
+- prohibited language
+
+These inputs help me keep the content within approved boundaries and give the judge something concrete to review.
+
+## How I write the tests
+
+I focus the tests on business outcomes rather than exact wording. A strong test in this project checks that:
+
+- the request succeeds
+- content is generated
+- the judge returns the expected structure
+- the relevant criteria are marked PASS or FAIL
+- the overall result is appropriate for the scenario
+
+In short, I am using these tests to protect the business and the audience, not to match one specific sentence.
 
 ## Tech stack
 

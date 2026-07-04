@@ -1,4 +1,4 @@
-"""LLM-as-judge evaluation engine for pharma content compliance."""
+"""Review generated marketing content for safety and compliance."""
 
 import json
 import os
@@ -11,7 +11,7 @@ MODEL_NAME = "claude-haiku-4-5-20251001"
 
 
 def build_rubric_prompt(generated_content: str, source_docs: dict[str, Any], channel: str) -> str:
-    """Construct the compliance rubric prompt for the judge model."""
+    """Create the prompt the judge uses to review the content."""
     return f"""
 You are an expert compliance reviewer for pharmaceutical marketing content.
 Evaluate the generated content against the following rubric.
@@ -47,7 +47,7 @@ Return JSON only with this shape:
 
 
 def evaluate(generated_content: str, source_docs: dict[str, Any], channel: str) -> dict[str, Any]:
-    """Call the Anthropic judge model and parse a structured compliance evaluation."""
+    """Send the content to the compliance judge and return a PASS/FAIL review."""
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         return {
