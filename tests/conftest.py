@@ -1,9 +1,10 @@
-"""Shared pytest fixtures for the pharma content QA demo."""
+"""Shared pytest fixtures and pytest hooks for the pharma content QA demo."""
 
 from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -17,6 +18,54 @@ import pytest
 from playwright.sync_api import Page
 
 from utils.compliance_judge import evaluate as evaluate_compliance
+
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_REPORT_DIR = REPO_ROOT / "reports"
+DEFAULT_REPORT_PATH = DEFAULT_REPORT_DIR / "test_report.html"
+
+
+def _get_test_output_paths(session: pytest.Session) -> list[tuple[Path, Path]]:
+    """Return report and summary paths for each collected test file."""
+    output_paths: list[tuple[Path, Path]] = []
+    for item in session.items:
+        test_path = Path(item.nodeid.split("::")[0])
+        if not test_path.is_absolute():
+            test_path = (REPO_ROOT / test_path).resolve()
+        report_dir = test_path.parent
+        report_path = report_dir / "test_report.html"
+        summary_path = report_dir / "test_summary.md"
+        output_paths.append((report_path, summary_path))
+    return output_paths
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
+    """Write a markdown summary next to each test file after pytest completes when the report exists."""
+    force = os.getenv("RUN_REPORT", "").lower() in {"1", "true", "yes", "on"}
+    if exitstatus != 0:
+        return
+
+    if not DEFAULT_REPORT_PATH.exists():
+        return
+
+    for report_path, summary_path in _get_test_output_paths(session):
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(DEFAULT_REPORT_PATH, report_path)
+
+        if summary_path.exists() and not force:
+            continue
+
+        summary_content = f"""# Test Report: Pharma Content QA
+
+## Summary
+
+Summary of the latest pytest session for {report_path.parent.name}.
+
+- Result: Passed
+- Report: [{report_path.name}]({report_path.name})
+- Summary: [{summary_path.name}]({summary_path.name})
+"""
+        summary_path.write_text(summary_content, encoding="utf-8")
 
 
 @pytest.fixture(scope="session")

@@ -67,6 +67,31 @@ In short, I am using these tests to protect the business and the audience, not t
 
 Python, FastAPI, Playwright, pytest, Anthropic API, and httpx.
 
+## How to run the test and generate a report
+
+From the project root, I run the UI test with:
+
+```bash
+./.venv/bin/python -m pytest -q tests/ui/test_generate_flow.py
+```
+
+Pytest now handles the reporting workflow automatically:
+
+- it generates the HTML report at [reports/test_report.html](reports/test_report.html)
+- it writes a markdown summary at [reports/test_summary.md](reports/test_summary.md)
+- it shows the pass/fail result in the terminal
+
+If I want to overwrite the summary and report on a later run, I can set:
+
+```bash
+RUN_REPORT=1 ./.venv/bin/python -m pytest -q tests/ui/test_generate_flow.py
+```
+
+## How to view the report and summary
+
+- Open [reports/test_report.html](reports/test_report.html) in a browser to view the full HTML report.
+- Open [reports/test_summary.md](reports/test_summary.md) to review a simple written summary of the latest run.
+
 ## Setup
 
 1. Clone the repository.

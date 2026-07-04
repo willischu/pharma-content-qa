@@ -1,7 +1,10 @@
 """FastAPI application entrypoint for the pharma content QA demo."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 from app.routes.generate import router as generate_router
@@ -19,6 +22,9 @@ app.add_middleware(
 )
 
 app.include_router(generate_router)
+
+reports_dir = Path(__file__).resolve().parent.parent / "reports"
+app.mount("/reports", StaticFiles(directory=str(reports_dir), html=True), name="reports")
 
 
 @app.get("/health")
